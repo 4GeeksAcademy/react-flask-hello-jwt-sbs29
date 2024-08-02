@@ -1,3 +1,4 @@
+const apiUrl = process.env.BACKEND_URL + "/api"
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
@@ -13,14 +14,15 @@ const getState = ({ getStore, getActions, setStore }) => {
 					background: "white",
 					initial: "white"
 				}
-			]
+			],
+			token: null,
+			userInfo: null
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");
 			},
-
 			getMessage: async () => {
 				try{
 					// fetching data from the backend
@@ -46,6 +48,43 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				//reset the global store
 				setStore({ demo: demo });
+			},
+			login: async (email,password)=>{
+				let resp = await fetch(apiUrl + "/login",{
+					method: "POST",
+					body:JSON.stringify({email,password}),
+					headers:{
+						"Content-Type":"application/json"
+					}
+				})
+				if(!resp.ok){
+					setStore({token:null})
+					return false
+				}
+				let data = await resp.json()
+				setStore({token: data.token})
+				localStorage.setItem("token", data.token)
+				return true
+			},
+			loadSession: async () => {
+				let storageToken = localStorage.getItem("token")
+				if (!storageToken) return
+				setStore({token:storageToken})
+				let resp = await fetch(apiUrl+"/userinfo",{headers:{"Authorization":"Bearer " + storageToken}})
+				if(!resp.ok) {
+					setStore({token:null})
+					return false
+				}
+				let data = await resp.json()
+				setStore({ userInfo: data})
+			},
+			logout: async () => {
+				let {token} = getStore()
+				let resp = await fetch(apiUrl+"/userinfo",{method:"POST", headers:{"Authorization":"Bearer " + token}})
+				if(!resp.ok) return false
+				setStore({token:null, userInfo: null})
+				localStorage.removeItem("token")
+				return true
 			}
 		}
 	};
