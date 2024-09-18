@@ -1,39 +1,78 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { Context } from "../store/appContext";
+
 
 export const Login = () => {
 	const { store, actions } = useContext(Context);
-	const navigate = useNavigate()
+	const navigate = useNavigate();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [errorMessage, setErrorMessage] = useState("");
 
-	async function submitForm(e){
-		e.preventDefault()
-		let formData = new FormData(e.target)
-		let email = formData.get("email")
-		let password = formData.get("password")
-		let logged = actions.login(email, password)
-		if (logged) navigate("/")
-	}
+	const handleCancelButton = () => {
+		navigate('/');
+	};
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+
+		const success = await actions.login(email, password);
+
+		if (success) {
+			navigate("/private");
+		} else {
+			setErrorMessage(store.errorMessage || "An error occurred during login.");
+		}
+
+	};
 
 	return (
-		<div className="container">
-			<form onSubmit={submitForm}>
-				<div class="mb-3">
-					<label for="exampleInputEmail1" class="form-label">Email address</label>
-					<input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
-					<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+		<div id="table-login" className="card d-flex justify-content-center my-5 p-5 mx-auto" style={{ maxWidth: '600px', fontFamily: 'Trebuchet MS', width: '100%' }}>
+			<form onSubmit={handleSubmit}>
+
+				{errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+
+				<div className="form-outline mb-4">
+					<h2>Welcome back!</h2>
 				</div>
-				<div class="mb-3">
-					<label for="exampleInputPassword1" class="form-label">Password</label>
-					<input type="password" class="form-control" id="exampleInputPassword1"/>
+				<div className="form-outline mb-4">
+					<input
+						onChange={(e) => setEmail(e.target.value)}
+						type="email"
+						id="form2Example1"
+						className="form-control"
+						required
+					/>
+					<label className="form-label" htmlFor="form2Example1" placeholder="Email">Email</label>
 				</div>
-				<div class="mb-3 form-check">
-					<input type="checkbox" class="form-check-input" id="exampleCheck1"/>
-					<label class="form-check-label" for="exampleCheck1">Check me out</label>
+
+
+				<div className="form-outline mb-4">
+					<input
+						onChange={(e) => setPassword(e.target.value)}
+						type="password"
+						id="form2Example2"
+						className="form-control"
+						required
+					/>
+					<label className="form-label" htmlFor="form2Example2">Password</label>
 				</div>
-				<button type="submit" class="btn btn-primary">Submit</button>
+
+				<div className="text-center">
+					<p>
+						Not a member? <Link to="/signup">Register</Link>
+					</p>
+				</div>
+
+				<div className="d-grid gap-2 col-6 mx-auto">
+					<button type="submit" className="btn btn-success btn-block ">
+						Login
+					</button>
+					<button type="submit" className="btn btn-outline-danger" onClick={handleCancelButton}>
+						Cancel
+					</button>
+				</div>
 			</form>
 		</div>
 	);
