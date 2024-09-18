@@ -7,7 +7,7 @@ export const Private = () => {
 	
 	return (
 		<div className="d-flex justify-content-center">
-            <h1>Area privada</h1>
+            <h1>Private Area</h1>
 		</div>
 	);
 };
